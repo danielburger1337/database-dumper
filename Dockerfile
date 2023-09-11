@@ -11,14 +11,15 @@ RUN mkdir -p /app
 COPY composer.json /tmp/composer/composer.json
 COPY composer.lock /tmp/composer/composer.lock
 
-RUN cp -a /tmp/composer/vendor /app && rm -rf /tmp/composer
+RUN cd /tmp/composer && composer install --no-ansi --no-interaction --no-progress --no-scripts --no-dev && \
+    composer clear-cache && cp -a /tmp/composer/vendor /app && rm -rf /tmp/composer
 
 WORKDIR /app
 
 COPY . .
 
 # Rebuild autoloader to fix /tmp/composer classmap
-RUN composer dump-autoload --no-ansi --no-interaction --optimize --no-scripts --classmap-authoritative --no-dev
+RUN composer dump-autoload --no-ansi --no-interaction --optimize --no-scripts --classmap-authoritative
 
 # Add php configuration
 COPY php.ini /usr/local/etc/php/conf.d/php_app.ini
