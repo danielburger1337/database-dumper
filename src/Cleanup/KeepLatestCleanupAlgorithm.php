@@ -30,7 +30,13 @@ class KeepLatestCleanupAlgorithm implements CleanupAlgorithmInterface
             ->filter(function (StorageAttributes $attr): bool {
                 $fileName = \pathinfo($attr->path(), \PATHINFO_BASENAME);
 
-                return \str_ends_with($fileName, '.sql') || \str_ends_with($fileName, '.sql.gz');
+                foreach (['.sql', '.sql.gz', '.enc'] as $ext) {
+                    if (\str_ends_with($fileName, $ext)) {
+                        return true;
+                    }
+                }
+
+                return false;
             })
             ->map(fn (StorageAttributes $attr) => $attr->path())
             ->toArray()
