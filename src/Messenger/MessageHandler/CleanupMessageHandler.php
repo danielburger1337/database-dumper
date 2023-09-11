@@ -7,7 +7,9 @@ use League\Flysystem\FilesystemOperator;
 use League\Flysystem\StorageAttributes;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+#[AsMessageHandler]
 class CleanupMessageHandler
 {
     public function __construct(
