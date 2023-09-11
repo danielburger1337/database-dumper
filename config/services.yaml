@@ -15,6 +15,8 @@ services:
             League\Flysystem\FilesystemOperator $defaultStorage: "@app.default_storage"
 
     _instanceof:
+        App\Service\Dumper\DumperInterface:
+            tags: ["app.dumper_service"]
 
         App\Filesystem\FilesystemFactoryInterface:
             tags: ["app.filesystem_factory"]
