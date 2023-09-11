@@ -66,6 +66,10 @@ services:
             # and "DB_DUMPER_CLEANUP_ALGORITHM" is "keep_latest"
             # - DB_DUMPER_CLEANUP_KEEP_LATEST_COUNT=5
 
+            # Optional: Encrypt the database dump with the following password
+            # - DB_DUMPER_ENCRYPTION_PASSWORD=123456
+            # openssl enc -d -pbkdf2 -aes-256-cbc -in your_dump.sql.enc -out your_dump.sql -k 123456
+
         # A volume mount is only required if the local filesystem adapter is used.
         # Make sure to mount the same path as used in your "DB_DUMPER_FILESYSTEM_DSN"
         # environment variable.

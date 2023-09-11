@@ -2,8 +2,8 @@
 
 namespace App\Dumper;
 
+use App\Service\UploadService;
 use App\Util\Dsn;
-use League\Flysystem\FilesystemOperator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -23,7 +23,7 @@ class MySQLDumper implements DumperInterface
         private readonly string $projcectDir,
         #[Autowire(env: 'bool:DB_DUMPER_ENABLE_GZIP')]
         private readonly bool $enableGzip,
-        private readonly FilesystemOperator $defaultStorage,
+        private readonly UploadService $uploadService,
         private readonly LoggerInterface $logger
     ) {
     }
@@ -81,14 +81,7 @@ class MySQLDumper implements DumperInterface
                 $dsn->hasOption('filename') ? (string) $dsn->getOption('filename') : $this->fileName,
             );
 
-            $this->logger->info('[MySQLDumper] Uploading dump "{fileName}".', ['fileName' => $filename]);
-
-            $contents = \file_get_contents($tmpFile);
-            if (false === $contents) {
-                throw new \RuntimeException('Failed to get contents of tmp mysqldump.');
-            }
-
-            $this->defaultStorage->write($filename, $contents);
+            $this->uploadService->uploadFile($filename, $tmpFile);
         } finally {
             @\unlink($tmpFile);
         }
