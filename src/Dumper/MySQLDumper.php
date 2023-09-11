@@ -76,20 +76,15 @@ class MySQLDumper implements DumperInterface
                 'OUTPUT_TARGET' => $tmpFile,
             ]);
 
-            $filename = $this->createFileName(
-                // @phpstan-ignore-next-line
-                $dsn->hasOption('filename') ? (string) $dsn->getOption('filename') : $this->fileName,
-            );
-
-            $this->uploadService->uploadFile($filename, $tmpFile);
+            $this->uploadService->uploadFile($this->createFileName(), $tmpFile);
         } finally {
             @\unlink($tmpFile);
         }
     }
 
-    private function createFileName(string $fileName): string
+    private function createFileName(): string
     {
-        $fileName = \str_replace('{date}', $this->clock->now()->format('Ymd_His'), $fileName);
+        $fileName = \str_replace('{date}', $this->clock->now()->format('Ymd_His'), $this->fileName);
         $fileName .= '.sql';
 
         return $this->enableGzip ? $fileName.'.gz' : $fileName;

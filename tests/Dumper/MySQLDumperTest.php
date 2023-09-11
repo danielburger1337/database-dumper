@@ -55,18 +55,6 @@ class MySQLDumperTest extends KernelTestCase
         // ? Maybe somehow find out that only this db was actually dumped
     }
 
-    public function testCustomName(): void
-    {
-        $dsn = $this->getDsn();
-        $dsn->options['filename'] = 'customName-{date}';
-
-        $this->getService()->dump($dsn);
-
-        $filename = 'customName-'.$this->getClock()->now()->format('Ymd_His').'.sql.gz';
-
-        $this->assertTrue($this->getFilesystem()->fileExists($filename));
-    }
-
     private function getClock(): ClockInterface
     {
         return static::getContainer()->get(ClockInterface::class);
