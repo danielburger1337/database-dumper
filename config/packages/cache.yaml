@@ -1,7 +1,7 @@
 framework:
     cache:
         # Unique name of your app: used to compute stable namespaces for cache keys.
-        #prefix_seed: your_vendor_name/app_name
+        prefix_seed: danielburger1337/database-dumper
 
         # The "app" cache stores to the filesystem by default.
         # The data in this cache should persist between deploys.
@@ -16,4 +16,4 @@ framework:
 
         # Namespaced pools use the above "app" backend by default
         #pools:
-            #my.dedicated.cache: null
+        #my.dedicated.cache: null
