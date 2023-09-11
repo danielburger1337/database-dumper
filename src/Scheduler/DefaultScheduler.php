@@ -16,6 +16,8 @@ class DefaultScheduler implements ScheduleProviderInterface
     public function __construct(
         #[Autowire(env: 'DB_DUMPER_SCHEDULE')]
         private readonly string $schedule,
+        #[Autowire(env: 'DB_DUMPER_CLEANUP_SCHEDULE')]
+        private readonly string $cleanupSchedule
     ) {
     }
 
@@ -24,6 +26,10 @@ class DefaultScheduler implements ScheduleProviderInterface
         $schedule = (new Schedule())
             ->add(RecurringMessage::cron($this->schedule, new DumpMessage()))
         ;
+
+        if ('' !== $this->cleanupSchedule) {
+            $schedule->add(RecurringMessage::cron($this->cleanupSchedule, new CleanupMessage()));
+        }
 
         return $schedule;
     }
