@@ -1,4 +1,4 @@
-FROM php8.2-cli
+FROM php:8.2-cli
 
 RUN apt-get update -y && apt-get install -y zip unzip mariadb-client
 
