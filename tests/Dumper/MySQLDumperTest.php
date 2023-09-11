@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace App\Tests\Service\Dumper;
+namespace App\Tests\Dumper;
 
-use App\Service\Dumper\MySQLDumper;
+use App\Dumper\MySQLDumper;
 use App\Util\Dsn;
 use League\Flysystem\FilesystemOperator;
 use Symfony\Bridge\PhpUnit\ClockMock;

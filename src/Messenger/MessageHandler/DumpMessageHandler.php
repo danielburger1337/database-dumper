@@ -2,8 +2,8 @@
 
 namespace App\Messenger\MessageHandler;
 
+use App\Dumper\DumperInterface;
 use App\Messenger\Message\DumpMessage;
-use App\Service\Dumper\DumperInterface;
 use App\Util\Dsn;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
