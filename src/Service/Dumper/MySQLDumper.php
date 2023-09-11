@@ -77,12 +77,18 @@ class MySQLDumper implements DumperInterface
             ]);
 
             $filename = $this->createFileName(
-                $dsn->hasOption('filename') ? $dsn->getOption('filename') : $this->fileName,
+                // @phpstan-ignore-next-line
+                $dsn->hasOption('filename') ? (string) $dsn->getOption('filename') : $this->fileName,
             );
 
             $this->logger->info('[MySQLDumper] Uploading dump "{fileName}".', ['fileName' => $filename]);
 
-            $this->defaultStorage->write($filename, \file_get_contents($tmpFile));
+            $contents = \file_get_contents($tmpFile);
+            if (false === $contents) {
+                throw new \RuntimeException('Failed to get contents of tmp mysqldump.');
+            }
+
+            $this->defaultStorage->write($filename, $contents);
         } finally {
             @\unlink($tmpFile);
         }

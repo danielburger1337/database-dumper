@@ -25,7 +25,7 @@ class FtpFilesystemFactory implements FilesystemFactoryInterface
             'host' => $dsn->getHost(),
             'username' => $dsn->getUser(),
             'port' => $dsn->getPort(21),
-            'timeout' => (int) $dsn->getOption('timeout', 5),
+            'timeout' => (int) $dsn->getOption('timeout', 5), // @phpstan-ignore-line
             'ssl' => 'ftps' === $dsn->getScheme(),
             'root' => $dsn->getPath() ?? '/',
         ];

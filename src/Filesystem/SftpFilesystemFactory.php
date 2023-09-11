@@ -25,7 +25,7 @@ class SftpFilesystemFactory implements FilesystemFactoryInterface
             'host' => $dsn->getHost(),
             'username' => $dsn->getUser(),
             'port' => $dsn->getPort(22),
-            'timeout' => (int) $dsn->getOption('timeout', 5),
+            'timeout' => (int) $dsn->getOption('timeout', 5), // @phpstan-ignore-line
         ];
 
         if (null !== ($hostFingerprint = $dsn->getOption('hostFingerprint'))) {
@@ -33,6 +33,7 @@ class SftpFilesystemFactory implements FilesystemFactoryInterface
         }
 
         if (null !== ($privateKey = $dsn->getOption('base64_privateKey'))) {
+            // @phpstan-ignore-next-line
             $providerOptions['privateKey'] = \base64_decode((string) $privateKey);
         } else {
             if (null !== ($password = $dsn->getPassword())) {

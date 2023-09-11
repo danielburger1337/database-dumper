@@ -2,6 +2,7 @@
 
 namespace App\Messenger\MessageHandler;
 
+use App\Messenger\Message\CleanupMessage;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\StorageAttributes;
 use Psr\Log\LoggerInterface;
@@ -17,7 +18,7 @@ class CleanupMessageHandler
     ) {
     }
 
-    public function __invoke(): void
+    public function __invoke(CleanupMessage $message): void
     {
         $paths = $this->defaultStorage->listContents('.')
             ->filter(fn (StorageAttributes $attr) => $attr->isFile())

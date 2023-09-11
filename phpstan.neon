@@ -1,0 +1,6 @@
+parameters:
+  reportUnmatchedIgnoredErrors: false
+  checkMissingIterableValueType: false
+
+  paths:
+    - src
