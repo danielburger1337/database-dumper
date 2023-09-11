@@ -1,0 +1,28 @@
+/.git
+/.gitignore
+/.gitattributes
+
+.DS_Store
+desktop.ini
+
+/.dockerignore
+/Dockerfile
+/docker-compose.yml
+/docker-compose.*.yml
+
+/.editorconfig
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/*/*.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< friendsofphp/php-cs-fixer ###
