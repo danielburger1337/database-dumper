@@ -5,7 +5,7 @@
 # Database Dumper
 
 This tool automatically dumps your database(s) and either saves them to a specified directory or uploads them to a remote server.
-Currently SFTP and FTP are support. See [FilesystemFactoryInterface](src/Filesystem/FilesystemFactoryInterface.php) to implement new filesystem support (it uses [league/flystem](https://github.com/thephpleague/flysystem) internally).
+Currently SFTP and FTP are supported. See [FilesystemFactoryInterface](src/Filesystem/FilesystemFactoryInterface.php) to implement new filesystem support (it uses [league/flystem](https://github.com/thephpleague/flysystem) internally).
 
 It also has a very simple and optional feature to automatically remove old database dumps from the given filesystem.
 This currently only supports keeping the latest `N` files.
