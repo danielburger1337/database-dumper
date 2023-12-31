@@ -13,6 +13,7 @@ class FilesystemFactory
      * @param iterable<FilesystemFactoryInterface> $filesystemFactories
      */
     public function __construct(
+        #[\SensitiveParameter]
         #[Autowire(env: 'DB_DUMPER_FILESYSTEM_DSN')]
         private readonly string $dsn,
         #[TaggedIterator('app.filesystem_factory')]

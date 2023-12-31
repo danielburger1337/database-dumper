@@ -15,6 +15,7 @@ final class Dsn implements \Stringable
         public string $host,
         public ?string $path,
         public ?string $user = null,
+        #[\SensitiveParameter]
         public ?string $password = null,
         public ?int $port = null,
         public array $options = []

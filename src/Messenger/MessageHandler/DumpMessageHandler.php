@@ -20,6 +20,7 @@ class DumpMessageHandler
     public function __construct(
         #[TaggedIterator('app.dumper_service')]
         private readonly iterable $dumperServices,
+        #[\SensitiveParameter]
         #[Autowire(env: 'DB_DUMPER_COMMAND')]
         private readonly string $command
     ) {
