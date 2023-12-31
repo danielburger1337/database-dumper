@@ -14,12 +14,12 @@ jobs:
         strategy:
             matrix:
                 operating-system: [ubuntu-latest]
-                php-versions: ["8.2"]
+                php-versions: ['8.3']
 
         name: PHP ${{ matrix.php-versions }} Static Analysis on ${{ matrix.operating-system }}
 
         env:
-            PHP_EXTENSIONS: gmp
+            PHP_EXTENSIONS: gmp mcrypt
             key: cache-v1
 
         steps:
