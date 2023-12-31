@@ -72,7 +72,7 @@ class MySQLDumperTest extends KernelTestCase
 
     private function getDsn(): Dsn
     {
-        return Dsn::fromString($_ENV['DB_DUMPER_MYSQL_COMMAND']);
+        return Dsn::fromString($_ENV['DB_DUMPER_COMMAND']);
     }
 
     private function getExpectedFileName(): string
