@@ -57,17 +57,17 @@ class MySQLDumperTest extends KernelTestCase
 
     private function getClock(): ClockInterface
     {
-        return static::getContainer()->get(ClockInterface::class);
+        return static::getContainer()->get(ClockInterface::class); // @phpstan-ignore-line
     }
 
     private function getFilesystem(): FilesystemOperator
     {
-        return static::getContainer()->get('app.default_storage');
+        return static::getContainer()->get('app.default_storage'); // @phpstan-ignore-line
     }
 
     private function getService(): MySQLDumper
     {
-        return static::getContainer()->get(MySQLDumper::class);
+        return static::getContainer()->get(MySQLDumper::class); // @phpstan-ignore-line
     }
 
     private function getDsn(): Dsn

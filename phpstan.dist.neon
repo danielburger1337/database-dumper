@@ -1,0 +1,11 @@
+parameters:
+    reportUnmatchedIgnoredErrors: false
+    checkMissingIterableValueType: false
+
+    level: 8
+    paths:
+        - bin/
+        - config/
+        - public/
+        - src/
+        - tests/
