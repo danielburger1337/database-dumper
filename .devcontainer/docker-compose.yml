@@ -1,0 +1,38 @@
+version: '3.8'
+
+x-logging-policy: &logging_policy
+    logging:
+        driver: 'json-file'
+        options:
+            max-size: '200k'
+            max-file: '1'
+
+services:
+    mariadb:
+        image: mariadb:10.11
+
+        <<: *logging_policy
+
+        environment:
+            MARIADB_ROOT_PASSWORD: root
+            MARIADB_DATABASE: db_dump_test
+
+        volumes:
+            - mariadb_data:/var/lib/mysql
+
+    db_dumper:
+        build:
+            context: .
+
+        <<: *logging_policy
+
+        user: vscode
+
+        volumes:
+            - ..:/db-dumper:cached
+
+        depends_on:
+            - mariadb
+
+volumes:
+    mariadb_data:

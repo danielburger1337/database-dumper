@@ -1,0 +1,77 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/docker-existing-docker-compose
+{
+    "name": "danielburger1337/database-dumper Devcontainer",
+
+    // Update the 'dockerComposeFile' list if you have more compose files or use different names.
+    "dockerComposeFile": ["docker-compose.yml"],
+
+    // The 'service' property is the name of the service for the container that VS Code should
+    // use. Update this value and .devcontainer/docker-compose.yml to the real service name.
+    "service": "db_dumper",
+
+    // The optional 'workspaceFolder' property is the path VS Code should open by default when
+    // connected. This is typically a file mount in .devcontainer/docker-compose.yml
+    "workspaceFolder": "/db-dumper",
+
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    // "forwardPorts": [8000],
+    "otherPortsAttributes": {
+        "onAutoForward": "ignore"
+    },
+
+    // Uncomment the next line if you want start specific services in your Docker Compose config.
+    // "runServices": ["db_dumper", "mariadb"],
+
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "php.validate.executablePath": "/usr/local/bin/php",
+
+                "[php]": {
+                    "editor.defaultFormatter": "junstyle.php-cs-fixer"
+                },
+
+                "editor.formatOnSave": true,
+                "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+                "editor.unicodeHighlight.nonBasicASCII": true,
+                "editor.unicodeHighlight.invisibleCharacters": true,
+
+                "files.associations": {
+                    "symfony.lock": "json"
+                },
+
+                "intelephense.environment.phpVersion": "^8.3",
+                "intelephense.diagnostics.undefinedMethods": false,
+                "intelephense.telemetry.enabled": false,
+                "intelephense.trace.server": "messages",
+
+                "php-cs-fixer.onsave": true,
+                "php-cs-fixer.documentFormattingProvider": true,
+                "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
+
+                "eslint.validate": ["javascript"]
+            },
+            "extensions": [
+                "EditorConfig.EditorConfig",
+                "junstyle.php-cs-fixer",
+                "bmewburn.vscode-intelephense-client",
+                "esbenp.prettier-vscode",
+                "ms-azuretools.vscode-docker",
+                "eamodio.gitlens",
+                "MehediDracula.php-namespace-resolver"
+            ]
+        }
+    },
+
+    // Uncomment the next line if you want to keep your containers running after VS Code shuts down.
+    // "shutdownAction": "none",
+
+    // Uncomment the next line to run commands after the container is created.
+    // "postAttachCommand": "symfony serve"
+
+    // Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
+    "remoteUser": "vscode",
+    "containerUser": "vscode"
+}
