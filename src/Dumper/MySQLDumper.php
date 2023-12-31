@@ -69,7 +69,12 @@ class MySQLDumper implements DumperInterface
 
         $process = Process::fromShellCommandline($commandLine.' > "$OUTPUT_TARGET"', $this->projcectDir, timeout: $timeout);
 
-        $this->logger->debug('[MySQLDumper] Executing command {command}', ['command' => $process->getCommandLine()]);
+        $commandToLog = $commandLine;
+        if (null !== $dsn->getPassword()) {
+            $commandToLog = \str_replace($dsn->getPassword(), '*****', $commandToLog);
+        }
+
+        $this->logger->debug('[MySQLDumper] Executing command {command}', ['command' => $commandToLog]);
 
         try {
             $process->mustRun(null, [
