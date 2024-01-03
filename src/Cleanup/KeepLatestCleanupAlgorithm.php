@@ -25,45 +25,54 @@ class KeepLatestCleanupAlgorithm implements CleanupAlgorithmInterface
 
     public function cleanup(FilesystemOperator $filesystem): void
     {
-        $paths = $filesystem->listContents('.')
-            ->filter(fn (StorageAttributes $attr) => $attr->isFile())
-            ->filter(function (StorageAttributes $attr): bool {
-                $fileName = \pathinfo($attr->path(), \PATHINFO_BASENAME);
-
-                foreach (['.sql', '.sql.gz', '.enc'] as $ext) {
-                    if (\str_ends_with($fileName, $ext)) {
-                        return true;
-                    }
-                }
-
-                return false;
-            })
-            ->map(fn (StorageAttributes $attr) => $attr->path())
-            ->toArray()
+        $directories = $filesystem->listContents('.')
+            ->filter(static fn (StorageAttributes $attr): bool => $attr->isDir())
+            ->map(static fn (StorageAttributes $attr): string => $attr->path())
         ;
 
-        $count = \count($paths);
+        foreach ($directories as $directory) {
+            $paths = $filesystem->listContents($directory)
+                ->filter(static fn (StorageAttributes $attr): bool => $attr->isFile())
+                ->filter(static function (StorageAttributes $attr): bool {
+                    $fileName = \pathinfo($attr->path(), \PATHINFO_BASENAME);
 
-        $this->logger->debug('[Cleanup] The storage destination has {count} sql dumps.', ['count' => $count]);
+                    foreach (['.sql', '.sql.gz', '.enc'] as $ext) {
+                        if (\str_ends_with($fileName, $ext)) {
+                            return true;
+                        }
+                    }
 
-        if ($count <= $this->retentionCount) {
-            return;
-        }
+                    return false;
+                })
+                ->map(static fn (StorageAttributes $attr): string => $attr->path())
+                ->toArray()
+            ;
 
-        $ordered = [];
-        foreach ($paths as $path) {
-            $ordered[$filesystem->lastModified($path)] = $path;
-        }
+            $count = \count($paths);
 
-        \ksort($ordered, \SORT_NUMERIC);
-        $ordered = \array_reverse($ordered);
+            $this->logger->info('[Cleanup] The storage destination "{directory}" has {count} sql dumps.', ['directory' => $directory, 'count' => $count]);
 
-        $toDelete = \array_slice($ordered, $this->retentionCount);
+            if ($count <= $this->retentionCount) {
+                $this->logger->info('[Cleanup] No dumps from "{directory}" will be removed because retention count of {retentionCount} is not exceeded.', ['directory' => $directory, 'retentionCount' => $this->retentionCount]);
 
-        foreach ($toDelete as $path) {
-            $this->logger->debug('[Cleanup] Removing old sql dump "{path}".', ['path' => $path]);
+                continue;
+            }
 
-            $filesystem->delete($path);
+            $ordered = [];
+            foreach ($paths as $path) {
+                $ordered[$filesystem->lastModified($path)] = $path;
+            }
+
+            \ksort($ordered, \SORT_NUMERIC);
+            $ordered = \array_reverse($ordered);
+
+            $toDelete = \array_slice($ordered, $this->retentionCount);
+
+            foreach ($toDelete as $path) {
+                $this->logger->info('[Cleanup] Removing old sql dump "{path}".', ['path' => $path]);
+
+                $filesystem->delete($path);
+            }
         }
     }
 }
