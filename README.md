@@ -17,7 +17,7 @@ To implement more database platforms, see [DumperInterface](src/Dumper/DumperInt
 ## How To use
 
 ```yml
-version: "3.8"
+version: '3.8'
 
 services:
     db_dumper:
@@ -28,10 +28,10 @@ services:
         restart: unless-stopped
 
         logging:
-            driver: "json-file"
+            driver: 'json-file'
             options:
-                max-size: "200k"
-                max-file: "3"
+                max-size: '200k'
+                max-file: '3'
 
         environment:
             # By default the database dumps will be stored in the "/data" directory
@@ -52,7 +52,7 @@ services:
             # This will only dump the "my-database-name" database
             # - DB_DUMPER_COMMAND=mysql://root@127.0.0.1:3306/my-database-name
             # This will dump the "my-database-name" and "my-other-database-name" databases
-            # - DB_DUMPER_COMMAND=mysql://root@127.0.0.1:3306/my-database-name%20my-other-database-name
+            # - DB_DUMPER_COMMAND=mysql://root@127.0.0.1:3306/my-database-name,my-other-database-name
 
             # Cron-Expression for when the database should be dumped
             # - DB_DUMPER_SCHEDULE=0 0 * * *
@@ -74,5 +74,5 @@ services:
         # Make sure to mount the same path as used in your "DB_DUMPER_FILESYSTEM_DSN"
         # environment variable.
         volumes:
-            - "./local-data-mount:/data"
+            - './local-data-mount:/data'
 ```
