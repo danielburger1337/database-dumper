@@ -5,6 +5,7 @@ namespace App\Messenger\MessageHandler;
 use App\Cleanup\CleanupAlgorithmInterface;
 use App\Messenger\Message\CleanupMessage;
 use League\Flysystem\FilesystemOperator;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -21,7 +22,8 @@ class CleanupMessageHandler
         private readonly iterable $cleanupAlgorithms,
         #[Autowire(env: 'DB_DUMPER_CLEANUP_ALGORITHM')]
         private readonly string $algorithm,
-        private readonly FilesystemOperator $defaultStorage
+        private readonly FilesystemOperator $defaultStorage,
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -29,7 +31,13 @@ class CleanupMessageHandler
     {
         foreach ($this->cleanupAlgorithms as $algo) {
             if ($this->algorithm === $algo->getName()) {
-                $algo->cleanup($this->defaultStorage);
+                $filePaths = $algo->getPathsToCleanup($this->defaultStorage);
+
+                $this->logger->info('[Cleanup] Found {count} database dump to clean up.', ['count' => \count($filePaths), 'algorithm' => $algo->getName()]);
+
+                if (!$message->dryRun) {
+                    $algo->cleanup($filePaths, $this->defaultStorage);
+                }
 
                 return;
             }

@@ -5,6 +5,7 @@ namespace App\Cleanup;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\StorageAttributes;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class KeepLatestCleanupAlgorithm implements CleanupAlgorithmInterface
@@ -23,12 +24,14 @@ class KeepLatestCleanupAlgorithm implements CleanupAlgorithmInterface
         return self::NAME;
     }
 
-    public function cleanup(FilesystemOperator $filesystem): void
+    public function getPathsToCleanup(FilesystemOperator $filesystem): array
     {
         $directories = $filesystem->listContents('.')
             ->filter(static fn (StorageAttributes $attr): bool => $attr->isDir())
             ->map(static fn (StorageAttributes $attr): string => $attr->path())
         ;
+
+        $cleanupPaths = [];
 
         foreach ($directories as $directory) {
             $paths = $filesystem->listContents($directory)
@@ -50,10 +53,10 @@ class KeepLatestCleanupAlgorithm implements CleanupAlgorithmInterface
 
             $count = \count($paths);
 
-            $this->logger->info('[Cleanup] The storage destination "{directory}" has {count} sql dumps.', ['directory' => $directory, 'count' => $count]);
+            $this->log('The storage destination "{directory}" has {count} sql dumps.', ['directory' => $directory, 'count' => $count]);
 
             if ($count <= $this->retentionCount) {
-                $this->logger->info('[Cleanup] No dumps from "{directory}" will be removed because retention count of {retentionCount} is not exceeded.', ['directory' => $directory, 'retentionCount' => $this->retentionCount]);
+                $this->log('No dumps from "{directory}" will be removed because retention count of {retentionCount} is not exceeded.', ['directory' => $directory, 'retentionCount' => $this->retentionCount]);
 
                 continue;
             }
@@ -66,13 +69,25 @@ class KeepLatestCleanupAlgorithm implements CleanupAlgorithmInterface
             \ksort($ordered, \SORT_NUMERIC);
             $ordered = \array_reverse($ordered);
 
-            $toDelete = \array_slice($ordered, $this->retentionCount);
-
-            foreach ($toDelete as $path) {
-                $this->logger->info('[Cleanup] Removing old sql dump "{path}".', ['path' => $path]);
-
-                $filesystem->delete($path);
-            }
+            $cleanupPaths = \array_merge($cleanupPaths, \array_slice($ordered, $this->retentionCount));
         }
+
+        return \array_unique($cleanupPaths);
+    }
+
+    public function cleanup(array $filePaths, FilesystemOperator $filesystem): void
+    {
+        foreach ($filePaths as $path) {
+            $this->log('Removing old sql dump "{path}".', ['path' => $path]);
+
+            $filesystem->delete($path);
+        }
+    }
+
+    private function log(string $message, array $context = [], string $level = LogLevel::INFO): void
+    {
+        $context['algorithm'] = $this->getName();
+
+        $this->logger->log($level, '[Cleanup] '.$message, $context);
     }
 }
