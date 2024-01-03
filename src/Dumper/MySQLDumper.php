@@ -48,7 +48,15 @@ class MySQLDumper implements DumperInterface
 
         if (null !== $dsn->getPath()) {
             $command[] = '--databases';
-            $command[] = \substr($dsn->getPath(), 1);
+
+            $path = $dsn->getPath();
+            if (\str_starts_with($path, '/')) {
+                $path = \substr($dsn->getPath(), 1);
+            }
+
+            $path = \explode(',', $path);
+
+            $command[] = \implode(' ', $path);
         } else {
             $command[] = '--all-databases';
         }

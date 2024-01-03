@@ -46,7 +46,7 @@ class MySQLDumperTest extends KernelTestCase
     public function testDumpMultipleDatabase(): void
     {
         $dsn = $this->getDsn();
-        $dsn->path = 'mysql information_schema';
+        $dsn->path = 'mysql,information_schema';
 
         $this->getService()->dump($dsn);
 
