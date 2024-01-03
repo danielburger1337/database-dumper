@@ -35,7 +35,7 @@ class ListDumpsCommand extends Command
             /** @var FileAttributes[] */
             $paths = $this->defaultStorage->listContents($directory)
                 ->filter(static fn (StorageAttributes $attr): bool => $attr->isFile())
-                ->filter(static function (FileAttributes $attr): bool {
+                ->filter(static function (StorageAttributes $attr): bool {
                     $fileName = \pathinfo($attr->path(), \PATHINFO_BASENAME);
 
                     foreach (['.sql', '.sql.gz', '.enc'] as $ext) {
@@ -83,7 +83,7 @@ class ListDumpsCommand extends Command
         return Command::SUCCESS;
     }
 
-    private static function formatBytes(int $size, int $precision = 2)
+    private static function formatBytes(int $size, int $precision = 2): string
     {
         $base = \log($size, 1024);
         $suffixes = ['', 'KB', 'MB', 'GB', 'TB'];
