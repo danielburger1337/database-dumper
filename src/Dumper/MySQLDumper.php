@@ -4,6 +4,7 @@ namespace App\Dumper;
 
 use App\Service\UploadService;
 use App\Util\Dsn;
+use Doctrine\DBAL\DriverManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -12,6 +13,8 @@ use Symfony\Component\Process\Process;
 class MySQLDumper implements DumperInterface
 {
     final public const SCHEME = 'mysql';
+
+    private const DEFAULT_DATABASE_NAMES = ['mysql', 'information_schema', 'performance_schema', 'sys'];
 
     public function __construct(
         private readonly ClockInterface $clock,
@@ -35,30 +38,49 @@ class MySQLDumper implements DumperInterface
 
     public function dump(Dsn $dsn): void
     {
-        $command = [
-            $this->binaryPath,
-            '-h', $dsn->getHost(),
-            '-P', $dsn->getPort(3306),
-            '-u', $dsn->getUser() ?? 'root',
-        ];
+        if (null === $dsn->getPath() || '/' === $dsn->getPath()) {
+            $databaseNames = $this->findDatabaseNames($dsn);
 
-        if (null !== $dsn->getPassword()) {
-            $command[] = '--password='.$dsn->getPassword();
-        }
-
-        if (null !== $dsn->getPath()) {
-            $command[] = '--databases';
-
+            if ($dsn->getOption('includeDefaultDbs', 'false') === 'false') {
+                foreach ($databaseNames as $key => $db) {
+                    if (\in_array($db, self::DEFAULT_DATABASE_NAMES, true)) {
+                        unset($databaseNames[$key]);
+                    }
+                }
+            }
+        } else {
             $path = $dsn->getPath();
             if (\str_starts_with($path, '/')) {
                 $path = \substr($dsn->getPath(), 1);
             }
 
-            $path = \explode(',', $path);
+            $databaseNames = \explode(',', $path);
 
-            $command[] = \implode(' ', $path);
-        } else {
-            $command[] = '--all-databases';
+            unset($path);
+        }
+
+        foreach ($databaseNames as $databaseName) {
+            $this->logger->debug('[MySQLDumper] Dumping database "{database}', ['database' => $databaseName]);
+
+            $this->dumpDatabase($dsn, $databaseName);
+        }
+    }
+
+    /**
+     * @param string $database The name of the database to dump.
+     */
+    private function dumpDatabase(Dsn $dsn, string $database): void
+    {
+        $command = [
+            $this->binaryPath,
+            '-h', $dsn->getHost(),
+            '-P', $dsn->getPort(3306),
+            '-u', $dsn->getUser() ?? 'root',
+            '--databases', $database,
+        ];
+
+        if (null !== $dsn->getPassword()) {
+            $command[] = '--password='.$dsn->getPassword();
         }
 
         $commandLine = (new Process($command))->getCommandLine();
@@ -82,24 +104,47 @@ class MySQLDumper implements DumperInterface
             $commandToLog = \str_replace($dsn->getPassword(), '*****', $commandToLog);
         }
 
-        $this->logger->debug('[MySQLDumper] Executing command {command}', ['command' => $commandToLog]);
+        $this->logger->debug('[MySQLDumper] Executing command {command}"', ['command' => $commandToLog]);
 
         try {
             $process->mustRun(null, [
                 'OUTPUT_TARGET' => $tmpFile,
             ]);
 
-            $this->uploadService->uploadFile($this->createFileName(), $tmpFile);
+            $this->uploadService->uploadFile($database.'/'.$this->createFileName($database), $tmpFile);
         } finally {
             @\unlink($tmpFile);
         }
     }
 
-    private function createFileName(): string
+    private function createFileName(string $dbName): string
     {
-        $fileName = \str_replace('{date}', $this->clock->now()->format('Ymd_His'), $this->fileName);
+        $fileName = \str_replace('{dbname}', $dbName, $this->fileName);
+        $fileName = \str_replace('{date}', $this->clock->now()->format('Ymd_His'), $fileName);
         $fileName .= '.sql';
 
         return $this->enableGzip ? $fileName.'.gz' : $fileName;
+    }
+
+    private function findDatabaseNames(Dsn $dsn): array
+    {
+        $connectionParams = [
+            'user' => $dsn->getUser() ?? 'root',
+            'host' => $dsn->getHost(),
+            'port' => $dsn->getPort(3306),
+            'driver' => 'pdo_mysql',
+        ];
+
+        if (null !== $dsn->getPassword()) {
+            $connectionParams['password'] = $dsn->getPassword();
+        }
+
+        $conn = DriverManager::getConnection($connectionParams);
+
+        $stmt = $conn->prepare('SHOW DATABASES;');
+
+        $result = $stmt->executeQuery()->fetchAllAssociativeIndexed();
+
+        return \array_keys($result);
     }
 }

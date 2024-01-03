@@ -26,9 +26,12 @@ class MySQLDumperTest extends KernelTestCase
 
     public function testDumpAllDatabases(): void
     {
-        $this->getService()->dump($this->getDsn());
+        $dsn = $this->getDsn();
+        $dsn->path = null;
 
-        $this->assertTrue($this->getFilesystem()->fileExists($this->getExpectedFileName()));
+        $this->getService()->dump($dsn);
+
+        $this->assertTrue($this->getFilesystem()->fileExists($this->getExpectedFileName('db_dump_test')));
     }
 
     public function testDumpOneDatabase(): void
@@ -38,21 +41,18 @@ class MySQLDumperTest extends KernelTestCase
 
         $this->getService()->dump($dsn);
 
-        $this->assertTrue($this->getFilesystem()->fileExists($this->getExpectedFileName()));
-
-        // ? Maybe somehow find out that only this db was actually dumped
+        $this->assertTrue($this->getFilesystem()->fileExists($this->getExpectedFileName('mysql')));
     }
 
     public function testDumpMultipleDatabase(): void
     {
         $dsn = $this->getDsn();
-        $dsn->path = 'mysql,information_schema';
+        $dsn->path = 'mysql,db_dump_test';
 
         $this->getService()->dump($dsn);
 
-        $this->assertTrue($this->getFilesystem()->fileExists($this->getExpectedFileName()));
-
-        // ? Maybe somehow find out that only this db was actually dumped
+        $this->assertTrue($this->getFilesystem()->fileExists($this->getExpectedFileName('mysql')));
+        $this->assertTrue($this->getFilesystem()->fileExists($this->getExpectedFileName('db_dump_test')));
     }
 
     private function getClock(): ClockInterface
@@ -75,9 +75,9 @@ class MySQLDumperTest extends KernelTestCase
         return Dsn::fromString($_ENV['DB_DUMPER_COMMAND']);
     }
 
-    private function getExpectedFileName(): string
+    private function getExpectedFileName(string $databaseName): string
     {
-        return 'mysqldump-'.$this->getClock()->now()->format('Ymd_His').'.sql.gz';
+        return $databaseName.'/mysqldump-'.$databaseName.'-'.$this->getClock()->now()->format('Ymd_His').'.sql.gz';
     }
 
     protected function setUp(): void
