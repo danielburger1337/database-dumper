@@ -131,7 +131,7 @@ class MySQLDumper implements DumperInterface
         $connectionParams = [
             'user' => $dsn->getUser() ?? 'root',
             'host' => $dsn->getHost(),
-            'port' => $dsn->getPort(3306),
+            'port' => (int) $dsn->getPort(3306),
             'driver' => 'pdo_mysql',
         ];
 
